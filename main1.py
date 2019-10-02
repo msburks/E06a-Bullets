@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 MARGIN = 30
-SCREEN_TITLE = "Bullet exercise"
+SCREEN_TITLE = "Penguin Killin"
 
+MOVEMENT_SPEED = 3
 NUM_ENEMIES = 5
 STARTING_LOCATION = (400,100)
 BULLET_DAMAGE = 10
@@ -69,7 +70,7 @@ class Window(arcade.Window):
         os.chdir(file_path)
 
         self.set_mouse_visible(True)
-        arcade.set_background_color(open_color.blue_4)
+        arcade.set_background_color(open_color.red_2)
         self.bullet_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.player = Player()
@@ -88,6 +89,15 @@ class Window(arcade.Window):
     def update(self, delta_time):
         self.bullet_list.update()
         for e in self.enemy_list:
+            damage = arcade.check_for_collision_with_list(e, self.bullet_list)
+            for d in damage:
+                e.hp -= d.damage
+                d.kill()
+                if e.hp <= 0:
+                    self.score += KILL_SCORE
+                    e.kill()
+                else:
+                    self.score += HIT_SCORE
             # check for collision
             # for every bullet that hits, decrease the hp and then see if it dies
             # increase the score
@@ -103,16 +113,29 @@ class Window(arcade.Window):
         self.enemy_list.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
-        '''
-        The player moves left and right with the mouse
-        '''
+        
+        #The player moves left and right with the mouse
+        
         self.player.center_x = x
+        self.player.center_y = y
 
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
+            x = self.player.center_x
+            y = self.player.center_y + 15
+            bullet = Bullet((x,y),(0,10),BULLET_DAMAGE)
+            self.bullet_list.append(bullet)
             #fire a bullet
             #the pass statement is a placeholder. Remove line 97 when you add your code
             pass
+
+    def on_key_press(self, key, modifiers):
+        """ Called whenever the user presses a key. """
+        pass
+
+    def on_key_release(self, key, modifiers):
+        """ Called whenever a user releases a key. """
+        pass
 
 def main():
     window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
